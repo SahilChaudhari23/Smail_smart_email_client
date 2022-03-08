@@ -37,6 +37,9 @@ dependencies:
   http: ^0.13.4
   google_sign_in: any
   get: ^4.6.1
+  extension_google_sign_in_as_googleapis_auth: ^2.0.4
+  googleapis: ^7.0.0
+  firebase_auth: ^3.3.7
 
 
 dev_dependencies:
