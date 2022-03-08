@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/gmail/v1.dart';
+import 'package:googleapis/admin/directory_v1.dart';
 import 'package:testing/message_model.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 
@@ -57,6 +58,7 @@ class SignInDemoState extends State<SignInDemo> {
   Future<void> _handleGmail(GoogleSignInAccount user) async {
     var httpClient = (await _googleSignIn.authenticatedClient())!;
     var gmailApi = GmailApi(httpClient);
+    var directoryApi = DirectoryApi(httpClient);
     var msg = '';
     int maxResults = gmailMessage.maxMsg;
     setState(() {
@@ -66,7 +68,7 @@ class SignInDemoState extends State<SignInDemo> {
     int count = 0;
     results.messages?.forEach((Message message) async{
       if(message.id != null){
-        var msg1 = (await gmailMessage.fetchMessages(gmailApi, message));
+        var msg1 = (await gmailMessage.fetchMessages(gmailApi, message, directoryApi));
         msg += msg1;
       }
       count++;

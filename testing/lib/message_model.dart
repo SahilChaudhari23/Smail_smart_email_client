@@ -1,6 +1,8 @@
+import 'package:googleapis/admin/directory_v1.dart';
 import 'package:testing/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart';
+import 'package:googleapis/admin/directory_v1.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -9,7 +11,7 @@ class GmailMessage{
   int id = 0;
   var messagesList = <Message>[];
   List<String> senderList = [];
-  List<User> userList = [];
+  List<UserData> userList = [];
   List<AppMessage> messages = [];
   List<String> headers = ["Subject","Delivered-To","Received","From","Date","To"];
   Codec<String, String> stringToBase64Url = utf8.fuse(base64Url);
@@ -196,7 +198,7 @@ class GmailMessage{
     return date+'/'+newTime+'/'+dateTime;
   }
 
-  Future<void> buildAppMessage(Message messageData) async {
+  Future<void> buildAppMessage(Message messageData, DirectoryApi directoryApi) async {
     String text = stringToBase64Url.decode(messageData.payload?.parts?.first.body?.data ?? '');
     String subject = "";
     String sender = "";
@@ -231,11 +233,13 @@ class GmailMessage{
           final temp = sender.split('>')[0].split('<');
           String emailId = temp[1];
           String userName = temp[0];
+          var photoData = directoryApi.users.photos.get(emailId);
+          debugPrint("dasfsgaga"+photoData.toString());
           if(!senderList.contains(sender)){
             id += 1;
             senderList.add(sender);
           }
-          senderData = User(id: id, name: userName,imageUrl: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0),emailId: emailId);
+          senderData = UserData(id: id, name: userName,imageUrl: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0),emailId: emailId);
           if(!senderList.contains(sender)){
             userList.add(senderData);
           }
@@ -246,12 +250,12 @@ class GmailMessage{
     messages.add(appMessageData);
   }
 
-  Future<String> fetchMessages(GmailApi gmailApi, Message message) async{
+  Future<String> fetchMessages(GmailApi gmailApi, Message message, DirectoryApi directoryApi) async{
     String msg = "";
     String id = message.id ?? "";
     Message messageData = await gmailApi.users.messages.get("me",id);
     messagesList.add(messageData);
-    await buildAppMessage(messageData);
+    await buildAppMessage(messageData, directoryApi);
     bool flag = true;
     messageData.payload?.headers?.forEach((element) {
       if(element.name != null && headers.contains(element.name) && ((element.name == "Received" && flag) || element.name != "Received")){
@@ -283,7 +287,7 @@ class GmailMessage{
 }
 
 class AppMessage {
-  final User sender;
+  final UserData sender;
   final String time;
   final String datetime;
   final String date;
