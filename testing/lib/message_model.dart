@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 class GmailMessage{
-  int maxMsg = 15;
+  int maxMsg = 2;
   int id = 0;
   var messagesList = <Message>[];
   List<String> senderList = [];
@@ -205,10 +205,10 @@ class GmailMessage{
     String date = "";
     String time = "";
     String dateTime = "";
-    var senderData;
+    late UserData senderData;
     // RegExp dateTimeExtractor =
     bool flag = true;
-    messageData.payload?.headers?.forEach((element) {
+    messageData.payload?.headers?.forEach((element){
       if(element.name != null && headers.contains(element.name) && ((element.name == "Received" && flag) || element.name != "Received")){
         if(element.name == "Received"){
           time = element.value ?? "" ;
@@ -230,23 +230,22 @@ class GmailMessage{
         }
         if(element.name == "From"){
           sender = element.value ?? "Unknown";
-          final temp = sender.split('>')[0].split('<');
-          String emailId = temp[1];
-          String userName = temp[0];
-          var photoData = directoryApi.users.photos.get(emailId);
-          debugPrint("dasfsgaga"+photoData.toString());
-          if(!senderList.contains(sender)){
-            id += 1;
-            senderList.add(sender);
-          }
-          senderData = UserData(id: id, name: userName,imageUrl: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0),emailId: emailId);
-          if(!senderList.contains(sender)){
-            userList.add(senderData);
-          }
         }
       }
     });
+    final temp = sender.split('>')[0].split('<');
+    String emailId = temp[1];
+    String userName = temp[0];
+    if(!senderList.contains(sender)){
+      id += 1;
+      senderList.add(sender);
+    }
+    senderData = UserData(id: id, name: userName,imageUrl: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0),emailId: emailId);
+    if(!senderList.contains(sender)){
+      userList.add(senderData);
+    }
     final appMessageData = AppMessage(sender: senderData, time: time, datetime: dateTime, date: date, text: text, subject: subject, isStarred: false, unread: false, priority: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(0.5));
+    debugPrint(senderData.name);
     messages.add(appMessageData);
   }
 

@@ -1,6 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:testing/tabs/mails.dart';
 import 'package:testing/tabs/meet.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:googleapis/gmail/v1.dart';
+import 'package:googleapis/admin/directory_v1.dart';
+import 'package:testing/message_model.dart';
+import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+
+final GoogleSignIn _googleSignIn = GoogleSignIn.standard(
+  scopes: <String>[
+    'email',
+    'https://www.googleapis.com/auth/contacts.readonly',
+    DirectoryApi.adminDirectoryUserReadonlyScope,
+    GmailApi.gmailReadonlyScope,
+  ],
+);
 
 class FrontPage extends StatefulWidget {
   const FrontPage({required Key key}) : super(key: key);
@@ -11,7 +28,72 @@ class FrontPage extends StatefulWidget {
 
 class _FrontPageState extends State<FrontPage> {
   int _currentIndex = 0;
-  final List<Widget> _children = [Mails(), Meet()];
+  final List<Widget> _children = [Mails()];
+  GoogleSignInAccount? _currentUser;
+  GmailMessage gmailMessage = GmailMessage();
+  String _mails = '';
+  List<Message> messagesList = [];
+  List<String> headers = ["Subject","Delivered-To","Received","From","Date","To"];
+  Codec<String, String> stringToBase64Url = utf8.fuse(base64Url);
+
+  @override
+  void initState() {
+    super.initState();
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      setState(() {
+        _currentUser = account;
+      });
+      if (_currentUser != null) {
+        _handleGmail(_currentUser!);
+      }
+    });
+    _googleSignIn.signInSilently();
+  }
+
+  Future<void> _handleGmail(GoogleSignInAccount user) async {
+    var httpClient = (await _googleSignIn.authenticatedClient())!;
+    var gmailApi = GmailApi(httpClient);
+    var directoryApi = DirectoryApi(httpClient);
+    var msg = '';
+    int maxResults = gmailMessage.maxMsg;
+    setState(() {
+      _mails = 'Loading mails...';
+    });
+    ListMessagesResponse results = await gmailApi.users.messages.list("me", maxResults:maxResults);
+    int count = 0;
+    results.messages?.forEach((Message message) async{
+      if(message.id != null){
+        var msg1 = (await gmailMessage.fetchMessages(gmailApi, message, directoryApi));
+        msg += msg1;
+      }
+      count++;
+      debugPrint(count.toString());
+
+      if(count == maxResults){
+        if (msg != '') {
+          gmailMessage.sortMessages();
+          debugPrint("count::::"+gmailMessage.messagesList.length.toString());
+          setState(() {
+            _mails = msg;
+            return;
+          });
+        }else{
+          _mails = "No mails to show";
+          return;
+        }
+      }
+    });
+  }
+
+  Future<void> _handleSignIn() async {
+    try {
+      await _googleSignIn.signIn();
+    } catch (error) {
+      return;
+    }
+  }
+
+  Future<void> _handleSignOut() => _googleSignIn.disconnect();
 
   @override
   Widget build(BuildContext context) {
