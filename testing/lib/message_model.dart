@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 class GmailMessage{
-  int maxMsg = 5;
+  int maxMsg = 15;
   int id = 0;
   var messagesList = <Message>[];
   List<String> senderList = [];
@@ -233,7 +233,6 @@ class GmailMessage{
           String userName = temp[0];
           if(!senderList.contains(sender)){
             id += 1;
-            debugPrint("here also");
             senderList.add(sender);
           }
           senderData = User(id: id, name: userName,imageUrl: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0),emailId: emailId);
@@ -245,22 +244,13 @@ class GmailMessage{
     });
     final appMessageData = AppMessage(sender: senderData, time: time, datetime: dateTime, date: date, text: text, subject: subject, isStarred: false, unread: false, priority: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(0.5));
     messages.add(appMessageData);
-    debugPrint("count : : "+messages.length.toString());
-    debugPrint(appMessageData.subject+ id.toString());
-  }
-
-  Future<Message> getMessages(GmailApi gmailApi, String id) async{
-    Message messageData = await gmailApi.users.messages.get("me",id);
-    return messageData;
   }
 
   Future<String> fetchMessages(GmailApi gmailApi, Message message) async{
     String msg = "";
     String id = message.id ?? "";
     Message messageData = await gmailApi.users.messages.get("me",id);
-    messagesList.add(await getMessages(gmailApi, id));
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint(messagesList.length.toString()+'ssss');
+    messagesList.add(messageData);
     await buildAppMessage(messageData);
     bool flag = true;
     messageData.payload?.headers?.forEach((element) {

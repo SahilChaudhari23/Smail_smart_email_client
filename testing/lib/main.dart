@@ -63,8 +63,6 @@ class SignInDemoState extends State<SignInDemo> {
       _mails = 'Loading mails...';
     });
     ListMessagesResponse results = await gmailApi.users.messages.list("me", maxResults:maxResults);
-    // Profile profile = (await gmailApi.users.getProfile("me"));
-    // msg += results.messages?.first.toJson().toString() ?? 'no data1';
     int count = 0;
     results.messages?.forEach((Message message) async{
       if(message.id != null){
@@ -76,6 +74,7 @@ class SignInDemoState extends State<SignInDemo> {
 
       if(count == maxResults){
         if (msg != '') {
+          gmailMessage.sortMessages();
           debugPrint("count::::"+gmailMessage.messagesList.length.toString());
           setState(() {
             _mails = msg;
