@@ -11,7 +11,7 @@ class Reply extends StatefulWidget {
   final String msg;
   final String time;
 
-  Reply({this.index, this.title, this.user, this.subject, this.msg, this.time});
+  Reply({required this.index, required this.title, required this.user, required this.subject, required this.msg, required this.time});
 
   @override
   _ReplyState createState() => _ReplyState();
@@ -20,7 +20,7 @@ class Reply extends StatefulWidget {
 class _ReplyState extends State<Reply> {
   //Widget text1 = Text("This is ");
   bool pressed = false;
-  File file;
+  late File file;
   var _mails = [
     '111801055@smail.iitpkd.ac.in',
     '111801035@smail.iitpkd.ac.in',
@@ -74,9 +74,9 @@ class _ReplyState extends State<Reply> {
             },
             onSelected: (value) async {
               //if (value == '1')
-              FilePickerResult result = await FilePicker.platform.pickFiles();
+              FilePickerResult? result = await FilePicker.platform.pickFiles();
               if (result != null) {
-                file = File(result.files.single.path);
+                file = File(result.files.single.path ?? "");
                 print(file);
               }
             },
@@ -148,14 +148,14 @@ class _ReplyState extends State<Reply> {
                   decoration: BoxDecoration(
                       border: Border(
                           bottom:
-                              BorderSide(color: Colors.grey[350], width: 1.0))),
+                              BorderSide(color: Colors.grey.shade300, width: 1.0))),
                 )
               ],
             ),
             Container(
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Colors.grey[350], width: 1.0),
+                  bottom: BorderSide(color: Colors.grey.shade300, width: 1.0),
                 ),
               ),
             ),
@@ -196,7 +196,7 @@ class _ReplyState extends State<Reply> {
                         decoration: BoxDecoration(
                           border: Border(
                             bottom:
-                                BorderSide(color: Colors.grey[350], width: 1.0),
+                                BorderSide(color: Colors.grey.shade300, width: 1.0),
                           ),
                         ),
                       ),
@@ -226,7 +226,7 @@ class _ReplyState extends State<Reply> {
                         decoration: BoxDecoration(
                           border: Border(
                             bottom:
-                                BorderSide(color: Colors.grey[350], width: 1.0),
+                                BorderSide(color: Colors.grey.shade300, width: 1.0),
                           ),
                         ),
                       ),
@@ -256,7 +256,7 @@ class _ReplyState extends State<Reply> {
                         decoration: BoxDecoration(
                           border: Border(
                             bottom:
-                                BorderSide(color: Colors.grey[350], width: 1.0),
+                                BorderSide(color: Colors.grey.shade300, width: 1.0),
                           ),
                         ),
                       ),
@@ -265,7 +265,7 @@ class _ReplyState extends State<Reply> {
                 : Container(
                     decoration: BoxDecoration(
                       border: Border(
-                        bottom: BorderSide(color: Colors.grey[350], width: 1.0),
+                        bottom: BorderSide(color: Colors.grey.shade300, width: 1.0),
                       ),
                     ),
                   ),
@@ -289,7 +289,7 @@ class _ReplyState extends State<Reply> {
             Container(
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Colors.grey[350], width: 1.0),
+                  bottom: BorderSide(color: Colors.grey.shade300, width: 1.0),
                 ),
               ),
             ),
@@ -346,19 +346,19 @@ class _ReplyState extends State<Reply> {
   String value = "111801054@smail.iitpkd.ac.in";
   Widget drop() {
     return DropdownButtonHideUnderline(
-      child: new DropdownButton(
+      child: DropdownButton(
         isExpanded: true,
         value: value,
         style: TextStyle(fontSize: 18, color: Colors.grey[700]),
         items: _mails.map((value) {
-          return new DropdownMenuItem(
+          return DropdownMenuItem(
             value: value,
-            child: new Text(value),
+            child: Text(value),
           );
         }).toList(),
         onChanged: (newValue) {
           setState(() {
-            value = newValue;
+            value = newValue.toString();
           });
           print(value);
         },

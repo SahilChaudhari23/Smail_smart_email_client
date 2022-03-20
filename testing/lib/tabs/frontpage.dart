@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:testing/tabs/mails.dart';
-import 'package:testing/tabs/meet.dart';
 import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/gmail/v1.dart';
 import 'package:googleapis/admin/directory_v1.dart';
-import 'package:testing/message_model.dart';
+import 'package:testing/models/message_model.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+
+GmailMessage gmailMessage = GmailMessage();
+GoogleSignInAccount? currentUser;
 
 final GoogleSignIn _googleSignIn = GoogleSignIn.standard(
   scopes: <String>[
@@ -20,31 +20,31 @@ final GoogleSignIn _googleSignIn = GoogleSignIn.standard(
 );
 
 class FrontPage extends StatefulWidget {
-  const FrontPage({required Key key}) : super(key: key);
-
   @override
-  _FrontPageState createState() => _FrontPageState();
+  FrontPageState createState() => FrontPageState();
 }
 
-class _FrontPageState extends State<FrontPage> {
+class FrontPageState extends State<FrontPage> {
+  final List<Widget> _children = [];
   int _currentIndex = 0;
-  final List<Widget> _children = [Mails()];
-  GoogleSignInAccount? _currentUser;
-  GmailMessage gmailMessage = GmailMessage();
-  String _mails = '';
-  List<Message> messagesList = [];
-  List<String> headers = ["Subject","Delivered-To","Received","From","Date","To"];
-  Codec<String, String> stringToBase64Url = utf8.fuse(base64Url);
+  String _msg = '';
+  String _state = '';
 
   @override
   void initState() {
     super.initState();
+    setState(() {
+      _state = 'init';
+    });
     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       setState(() {
-        _currentUser = account;
+        currentUser = account;
       });
-      if (_currentUser != null) {
-        _handleGmail(_currentUser!);
+      if (currentUser != null) {
+        setState(() {
+          _state = 'loading';
+        });
+        _handleGmail(currentUser!);
       }
     });
     _googleSignIn.signInSilently();
@@ -56,9 +56,9 @@ class _FrontPageState extends State<FrontPage> {
     var directoryApi = DirectoryApi(httpClient);
     var msg = '';
     int maxResults = gmailMessage.maxMsg;
-    setState(() {
-      _mails = 'Loading mails...';
-    });
+    // setState(() {
+    //   _mails = 'Loading mails...';
+    // });
     ListMessagesResponse results = await gmailApi.users.messages.list("me", maxResults:maxResults);
     int count = 0;
     results.messages?.forEach((Message message) async{
@@ -74,80 +74,179 @@ class _FrontPageState extends State<FrontPage> {
           gmailMessage.sortMessages();
           debugPrint("count::::"+gmailMessage.messagesList.length.toString());
           setState(() {
-            _mails = msg;
+            _state = 'loaded';
+            _msg = msg;
+            _children.add(Mails());
+            _children.add(Mails());
+            _children.add(_signOut());
             return;
           });
         }else{
-          _mails = "No mails to show";
+          _msg = "No mails to show";
+          debugPrint(_msg);
           return;
         }
       }
     });
   }
 
+
+  Future<void> _handleSignOut() => _googleSignIn.disconnect();
+
   Future<void> _handleSignIn() async {
     try {
       await _googleSignIn.signIn();
     } catch (error) {
-      return;
+      print(error);
     }
   }
 
-  Future<void> _handleSignOut() => _googleSignIn.disconnect();
+  Widget _signOut() {
+    _handleSignOut();
+    return _signIn();
+  }
+
+  Widget _signIn() {
+    return Scaffold(
+      // backgroundColor: Colors.deepOrange[300],
+      appBar: AppBar(title: Text('Login Page'),
+        backgroundColor: Colors.amber.shade300,
+      ),
+      body: Center(
+          child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                image: DecorationImage(
+                  image: AssetImage("assets/images/bg1.jpg"),
+                  fit: BoxFit.cover,
+                  opacity: 0.4,
+                ),
+              ),
+              child: Column(
+                // crossAxisAlignment: CrossAxisAlignment.center,
+                // mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 40.0),
+                    child: CircleAvatar(
+                      backgroundImage: AssetImage('assets/images/logo.png'),
+                      radius: 150.0,
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(bottom: 30.0),
+                    child: Text('Welcome to SMAIL',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  FloatingActionButton.extended(
+                    onPressed: (){ _handleSignIn();},
+                    icon: Image.asset('assets/images/google_logo.png',
+                      height: 32,
+                      width: 32,),
+                    label: Text('Sign in with Google'),
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                  ),
+                ],
+              )
+          ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _children[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        fixedColor: Colors.blue,
-        onTap: onTabTapped,
-        currentIndex: _currentIndex,
-        items: [
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0),
-              child: Stack(
-                children: <Widget>[
-                  const Icon(
-                    Icons.mail,
-                    size: 35,
-                  ),
-                  Positioned(
-                    right: 0,
-                    top: 0.0,
-                    child: Container(
-                      padding: const EdgeInsets.all(1),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 15,
-                        minHeight: 15,
-                      ),
-                      child: const Text(
-                        '9+',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  )
-                ],
-              ),
+    debugPrint(_state);
+    if (_state == 'loading') {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Emails are loading...',
+                  style: Theme.of(context).textTheme.headline6,
+                ),
+                CircularProgressIndicator(),
+              ],
             ),
-            label: 'Mail',
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.video_call, size: 35.0),
-            label: 'Meet',
-          )
-        ],
-      ),
-    );
+        )
+      );
+    }
+    if(_msg != ''){
+      debugPrint(gmailMessage.messages.first.subject);
+      return Scaffold(
+        body: _children[_currentIndex],
+        // backgroundColor: Colors.transparent,
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.lightBlue.shade100,
+          fixedColor: Colors.blue,
+          onTap: onTabTapped,
+          currentIndex: _currentIndex,
+          items: [
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0),
+                child: Stack(
+                  children: <Widget>[
+                    const Icon(
+                      Icons.mail,
+                      size: 35,
+                    ),
+                    Positioned(
+                      right: 0,
+                      top: 0.0,
+                      child: Container(
+                        padding: const EdgeInsets.all(1),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 15,
+                          minHeight: 15,
+                        ),
+                        child: const Text(
+                          '9+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              label: 'Mail',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.settings, size: 35.0),
+              label: 'Config',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.exit_to_app_rounded, size: 35.0),
+              label: 'Sign-out',
+            )
+          ],
+        ),
+      );
+    }else{
+      if(_state == 'init'){
+        return _signIn();
+      }else {
+        return _signIn();
+      }
+    }
   }
 
   void onTabTapped(int index) {

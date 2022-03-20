@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:testing/tabs/frontpage.dart';
 
 class Drawers extends StatefulWidget {
-  Drawers({Key key}) : super(key: key);
 
   @override
   _DrawersState createState() => _DrawersState();
@@ -16,24 +16,38 @@ class _DrawersState extends State<Drawers> {
         children: [
           Container(
           padding: const EdgeInsets.fromLTRB(20, 50, 0, 10),
-          width: MediaQuery.of(context).size.width * 0.45,
-           // decoration: BoxDecoration(
-           //   image: DecorationImage(
-           //     image: AssetImage('assets/logo.png'),
-           //     fit: BoxFit.scaleDown,
-           //   ),
-           //   shape: BoxShape.circle,
-           // ),
-           child: Text(
-              'Smail - Email Client',
-              style: TextStyle(
-                color: Colors.blue,
-                //fontFamily: 'LexendMega',
-                fontFamily: 'Cinzel',
-                fontSize: 22.0,
-              ),
-            ),
+          decoration: BoxDecoration(
+            color: Colors.deepOrange[400],
           ),
+          width: MediaQuery.of(context).size.width * 0.45,
+            height: 200.0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                    backgroundImage: AssetImage('assets/images/logo.png'),
+                    radius: 50.0,
+                  ),
+                const Text(
+                  '  Smail',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Cinzel',
+                    fontSize: 50.0,
+                    fontStyle: FontStyle.italic,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 10.0,
+                        color: Colors.white38,
+                        offset: Offset(5.0, 7.0),
+                      ),
+                    ],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ]
+            ),
+            ),
           Divider(),
           ListTile(
             leading: Icon(Icons.filter),
@@ -48,13 +62,6 @@ class _DrawersState extends State<Drawers> {
             title: Text('Important'),
           ),
           ListTile(
-            leading: Text('RECENT LABELS'),
-          ),
-          ListTile(
-            leading: Icon(Icons.label),
-            title: Text('Important'),
-          ),
-          ListTile(
             leading: Text('ALL LABELS'),
           ),
           ListTile(
@@ -62,36 +69,8 @@ class _DrawersState extends State<Drawers> {
             title: Text('Important'),
           ),
           ListTile(
-            leading: Icon(Icons.access_time),
-            title: Text('Snoozed'),
-          ),
-          ListTile(
-            leading: Icon(Icons.label_important_outline),
-            title: Text('Important'),
-          ),
-          ListTile(
             leading: Icon(Icons.send),
             title: Text('Sent'),
-          ),
-          ListTile(
-            leading: Icon(Icons.schedule_send),
-            title: Text('Scheduled'),
-          ),
-          ListTile(
-            leading: Icon(Icons.outbox),
-            title: Text('Outbox'),
-          ),
-          ListTile(
-            leading: Icon(Icons.file_copy),
-            title: Text('Drafts'),
-          ),
-          ListTile(
-            leading: Icon(Icons.mail),
-            title: Text('All mail'),
-          ),
-          ListTile(
-            leading: Icon(Icons.error_outline),
-            title: Text('Spam'),
           ),
           ListTile(
             leading: Icon(Icons.delete_outline),

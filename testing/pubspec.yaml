@@ -43,7 +43,6 @@ dependencies:
   file_picker: ^4.5.0
   carousel_slider: ^4.0.0
   share: ^2.0.4
-  clipboard_manager: ^0.0.4
 
 
 dev_dependencies:
@@ -73,6 +72,9 @@ flutter:
   assets:
     - assets/images/logo.png
     - assets/images/google_logo.png
+    - assets/images/sahil.jpg
+    - assets/images/bg.jpg
+    - assets/images/bg1.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

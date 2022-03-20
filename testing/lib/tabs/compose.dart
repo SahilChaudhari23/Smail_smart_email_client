@@ -1,36 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:testing/tabs/frontpage.dart';
+import 'package:testing/models/message_model.dart';
 // import 'dart:io';
 
 class Compose extends StatefulWidget {
-  Compose({Key key}) : super(key: key);
 
   @override
   _ComposeState createState() => _ComposeState();
 }
 
 class _ComposeState extends State<Compose> {
-  PlatformFile file;
+  late PlatformFile file;
   bool entered = false;
-  var _mails = [
-    '111801055@smail.iitpkd.ac.in',
-    '111801054@smail.iitpkd.ac.in',
-    '111801035@smail.iitpkd.ac.in',
-    '111801040@smail.iitpkd.ac.in',
-    'sjchaudhari23@gmail.com',
-    'albert@iitpkd.ac.in',
-    'academics@iitpkd.ac.in'
-  ];
+  final _mails = gmailMessage.emailIds;
   bool isClicked = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Colors.black, //change your color here
         ),
-        title: Text(
+        title: const Text(
           'Compose',
           style: TextStyle(
               color: Colors.black, fontSize: 18, fontFamily: "Roboto"),
@@ -56,11 +49,10 @@ class _ComposeState extends State<Compose> {
             },
             onSelected: (value) async {
               //if (value == '1')
-              FilePickerResult result = await FilePicker.platform.pickFiles();
+              FilePickerResult? result = await FilePicker.platform.pickFiles();
               if (result != null) {
                 file = result.files.first;
                 entered = true;
-                print(file);
               }
             },
           ),
@@ -124,7 +116,7 @@ class _ComposeState extends State<Compose> {
           Container(
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Colors.grey[350], width: 1.0),
+                bottom: BorderSide(color: Colors.grey.shade300, width: 1.0),
               ),
             ),
           ),
@@ -164,7 +156,7 @@ class _ComposeState extends State<Compose> {
                       decoration: BoxDecoration(
                         border: Border(
                           bottom:
-                              BorderSide(color: Colors.grey[350], width: 1.0),
+                              BorderSide(color: Colors.grey.shade300, width: 1.0),
                         ),
                       ),
                     ),
@@ -194,7 +186,7 @@ class _ComposeState extends State<Compose> {
                       decoration: BoxDecoration(
                         border: Border(
                           bottom:
-                              BorderSide(color: Colors.grey[350], width: 1.0),
+                              BorderSide(color: Colors.grey.shade300, width: 1.0),
                         ),
                       ),
                     ),
@@ -224,7 +216,7 @@ class _ComposeState extends State<Compose> {
                       decoration: BoxDecoration(
                         border: Border(
                           bottom:
-                              BorderSide(color: Colors.grey[350], width: 1.0),
+                              BorderSide(color: Colors.grey.shade300, width: 1.0),
                         ),
                       ),
                     ),
@@ -233,7 +225,7 @@ class _ComposeState extends State<Compose> {
               : Container(
                   decoration: BoxDecoration(
                     border: Border(
-                      bottom: BorderSide(color: Colors.grey[350], width: 1.0),
+                      bottom: BorderSide(color: Colors.grey.shade300, width: 1.0),
                     ),
                   ),
                 ),
@@ -257,7 +249,7 @@ class _ComposeState extends State<Compose> {
           Container(
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Colors.grey[350], width: 1.0),
+                bottom: BorderSide(color: Colors.grey.shade300, width: 1.0),
               ),
             ),
           ),
@@ -270,9 +262,7 @@ class _ComposeState extends State<Compose> {
                   decoration: InputDecoration(
                       hintText: "Compose email",
                       border: InputBorder.none,
-                      hintStyle: entered == false
-                          ? TextStyle(fontSize: 18, color: Colors.grey[700])
-                          : Text(file.name),
+                      hintStyle: (entered == false ? TextStyle(fontSize: 18, color: Colors.grey[700]) : Text(file.name)) as TextStyle?,
                       contentPadding: EdgeInsets.fromLTRB(20, 20, 20, 20)),
                   keyboardType: TextInputType.text,
                 ),
@@ -287,19 +277,19 @@ class _ComposeState extends State<Compose> {
   String value = "111801054@smail.iitpkd.ac.in";
   Widget drop() {
     return DropdownButtonHideUnderline(
-      child: new DropdownButton(
+      child: DropdownButton(
         isExpanded: true,
         value: value,
         style: TextStyle(fontSize: 18, color: Colors.grey[700]),
         items: _mails.map((value) {
-          return new DropdownMenuItem(
+          return DropdownMenuItem(
             value: value,
-            child: new Text(value),
+            child: Text(value),
           );
         }).toList(),
         onChanged: (newValue) {
           setState(() {
-            value = newValue;
+            value = newValue.toString();
           });
           print(value);
         },

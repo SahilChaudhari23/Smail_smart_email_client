@@ -1,14 +1,13 @@
 import 'package:testing/models/user_model.dart';
-import 'package:testing/models/message_model.dart';
+// import 'package:testing/models/message_model.dart';
 import 'package:testing/tabs/mails.dart';
+import 'package:testing/tabs/frontpage.dart';
 import 'package:flutter/material.dart';
 import 'package:testing/tabs/reply.dart';
 
 shortUsername(username) {
-  print(username);
   String uname = username.toString();
   if(uname.length >= 12){
-    print(uname.substring(0,12));
     return uname.substring(0,12)+"...";
   }else{
     return uname;
@@ -17,7 +16,7 @@ shortUsername(username) {
 // ignore: must_be_immutable
 class Gmail extends StatefulWidget {
   final int index;
-  final User user;
+  final UserData user;
   final Color image;
   final String time;
   final String text;
@@ -25,13 +24,16 @@ class Gmail extends StatefulWidget {
   bool isstarred;
 
   Gmail(
-      {this.index,
-      this.user,
-      this.image,
-      this.time,
-      this.text,
-      this.subject,
-      this.isstarred});
+      {
+        required this.index,
+        required this.user,
+        required this.image,
+        required this.time,
+        required this.text,
+        required this.subject,
+        required this.isstarred
+      });
+
   @override
   _GmailState createState() => _GmailState();
 }
@@ -42,7 +44,7 @@ class _GmailState extends State<Gmail> {
    GlobalKey _key2 = GlobalKey();
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
+    WidgetsBinding.instance?.addPostFrameCallback(_afterLayout);
     super.initState();
   }
 
@@ -93,7 +95,7 @@ class _GmailState extends State<Gmail> {
               //     );
               }),
           IconButton(icon: Icon(Icons.delete), onPressed: () {
-            mails.removeAt(widget.index - 1);
+            gmailMessage.messages.removeAt(widget.index - 1);
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -411,8 +413,8 @@ class _GmailState extends State<Gmail> {
   }
 
   _getSizes() {
-    final RenderBox renderBoxRed = _key2.currentContext.findRenderObject();
-    final sizeText = renderBoxRed.size;
+    final RenderObject? renderBoxRed = _key2.currentContext?.findRenderObject();
+    final sizeText = renderBoxRed?.depth;
     print("SIZE of Text: $sizeText");
   }
 
@@ -437,7 +439,7 @@ class _GmailState extends State<Gmail> {
         label: Text((text), style: TextStyle(color: Colors.grey[800])),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5),
-            side: BorderSide(color: Colors.grey[400])),
+            side: BorderSide(color: Colors.grey.shade400)),
       ),
     );
   }
