@@ -7,6 +7,7 @@ import 'package:googleapis/gmail/v1.dart';
 import 'package:googleapis/admin/directory_v1.dart';
 import 'dart:convert';
 import 'dart:math' as math;
+import 'package:testing/models/priority_handler.dart';
 
 class GmailMessage{
   int maxMsg = 10;
@@ -16,6 +17,7 @@ class GmailMessage{
   var emailIds = <String>[];
   var userList = <UserData>[];
   var messages = <AppMessage>[];
+  var priorityHandler = PriorityHandler();
   List<String> headers = ["Subject","Delivered-To","Received","From","Date","To"];
   Codec<String, String> stringToBase64Url = utf8.fuse(base64Url);
 
@@ -201,8 +203,9 @@ class GmailMessage{
     return date+'/'+newTime+'/'+dateTime;
   }
 
-  Future<void> buildAppMessage(Message messageData, DirectoryApi directoryApi) async {
+  Future<void> buildAppMessage(String emailId,Message messageData, DirectoryApi directoryApi) async {
     String text = stringToBase64Url.decode(messageData.payload?.parts?.first.body?.data ?? '');
+    debugPrint(messageData.payload?.mimeType ?? '');
     String subject = "";
     String sender = "";
     String date = "";
@@ -237,20 +240,20 @@ class GmailMessage{
       }
     });
     final temp = sender.split('>')[0].split('<');
-    String emailId = temp[1];
+    String emailAdd = temp[1];
     String userName = temp[0];
     bool flag1 = false;
     if(!senderList.contains(userName)){
       id += 1;
       senderList.add(userName);
-      emailIds.add(emailId);
+      emailIds.add(emailAdd);
       flag1 = true;
     }
     senderData = UserData(id: id, name: userName,imageUrl: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0),emailId: emailId);
     if(flag1){
       userList.add(senderData);
     }
-    final appMessageData = AppMessage(sender: senderData, time: time, datetime: dateTime, date: date, text: text, subject: subject, isStarred: false, unread: false, priority: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(0.5));
+    final appMessageData = AppMessage(id:emailId,sender: senderData, time: time, datetime: dateTime, date: date, text: text, subject: subject, isStarred: false, unread: false, priority: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(0.5));
     debugPrint(senderData.name);
     messages.add(appMessageData);
   }
@@ -258,9 +261,10 @@ class GmailMessage{
   Future<String> fetchMessages(GmailApi gmailApi, Message message, DirectoryApi directoryApi) async{
     String msg = "";
     String id = message.id ?? "";
+    // debugPrint(id);
     Message messageData = await gmailApi.users.messages.get("me",id);
     messagesList.add(messageData);
-    await buildAppMessage(messageData, directoryApi);
+    await buildAppMessage(id,messageData, directoryApi);
     bool flag = true;
     messageData.payload?.headers?.forEach((element) {
       if(element.name != null && headers.contains(element.name) && ((element.name == "Received" && flag) || element.name != "Received")){
@@ -282,16 +286,18 @@ class GmailMessage{
   void sortMessages(){
     messages.sort((a,b) => b.datetime.compareTo(a.datetime));
     debugPrint("count : : "+messagesList.length.toString());
-    for (var element in messages) {
-      debugPrint("sorting");
-      debugPrint(element.date);
-      debugPrint(element.time);
-      debugPrint(element.subject);
-    }
+    priorityHandler.getPriority(messages);
+    // for (var element in messages) {
+    //   debugPrint("sorting");
+    //   debugPrint(element.date);
+    //   debugPrint(element.time);
+    //   debugPrint(element.subject);
+    // }
   }
 }
 
 class AppMessage {
+  final String id;
   final UserData sender;
   final String time;
   final String datetime;
@@ -302,6 +308,7 @@ class AppMessage {
   bool isStarred;
   final bool unread;
   AppMessage({
+    required this.id,
     required this.sender,
     required this.time,
     required this.datetime,
@@ -313,131 +320,4 @@ class AppMessage {
     required this.priority,
   });
 }
-
-// final User currentUser =User(id: 0, name: 'Sahil Chaudhari', imageUrl: Colors.red);
-// final User sandhya = User(id: 1, name: 'Sandhya Chandrasekharan', imageUrl: Colors.orange);
-// final User acad = User(id: 2, name: 'Academic IIT Palakkad', imageUrl: Colors.grey);
-// final User medium = User(id: 3, name: 'Medium Daily', imageUrl: Colors.pink.shade700);
-// final User amazon = User(id: 4, name: 'Amazon.in', imageUrl: Colors.yellow);
-// final User vishesh = User(id: 5, name: 'Vishesh Munjal', imageUrl: Colors.red);
-// final User rajeev = User(id: 6, name: 'Rajeev Goyal', imageUrl:Colors.teal);
-// final User leetcode = User(id: 7, name: 'LeetCode', imageUrl: Colors.blueGrey);
-// final User digitalocean = User(id: 8, name: 'Digital Ocean', imageUrl: Colors.deepPurpleAccent);
-// final User digitalocean1 = User(id: 9, name: 'Digital Ocean', imageUrl: Colors.greenAccent);
-// final User digitalocean2 = User(id: 10, name: 'Digital Ocean', imageUrl: Colors.lightBlue);
-// final User digitalocean3 = User(id: 11, name: 'Digital Ocean', imageUrl: Colors.amber);
-// final User digitalocean4 = User(id: 12, name: 'Digital Ocean', imageUrl: Colors.pink.shade700);
-
-//Chats on Mail Screen
-
-// List<AppMessage> mails = [
-  // AppMessage(
-  //     sender: sandhya,
-  //     time: '04:30 PM',
-  //     text: 'Can you spot common mistakes to look out for when writing about campus?\n1, Security cameras with adequate backup facilities are installed in the campus.\n2. The first year students have their classes and accomodations in the Ahalia campus.\n3.At the Ahalia campus, the hostels are close to the academic block.\n4.  IIT Palakkad currently functions in two campuses.\n5. The boys and girls have separate hostels with 24/7 Wi-Fi connectivity.\nAnswersregards, Sandhya\n--\nRoom# 203, Academic Block,\nAhalia Campus\nIIT Palakkad',
-  //     subject: 'Correct the sentences',
-  //     isStarred: false,
-  //     unread: true,
-  //     priority: Colors.blueGrey
-  // ),
-  // AppMessage(
-  //     sender: acad,
-  //     time: '01:05 PM',
-  //     text: 'Dear Students,\nIn continuation to the mail sent, please be informed that the deadline for filling the google form for renewal of scholarships is extended till 13.12.2021 ( Monday ).\nThe google form link can be found here\nPlease note that no further extensions will be given for the same.',
-  //     subject: 'Renewal of Scholarships- Income Certificate Submission',
-  //     isStarred: true,
-  //     unread: false,
-  //     priority: Colors.red
-  // ),
-  // AppMessage(
-  //     sender: vishesh,
-  //     time: '10:00 AM',
-  //     text: 'Check the modified PDF attached & send feedback...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-  //     subject: 'PDF attached',
-  //     isStarred: false,
-  //     unread: false,
-  //     priority: Colors.amberAccent
-  // ),
-  // AppMessage(
-  //     sender: rajeev,
-  //     time: '9:30 AM',
-  //     text: 'Ive created the collab repo, shall we start making the project?...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-  //     subject: 'Invitation to github collaborator',
-  //     isStarred: false,
-  //     unread: false,
-  //     priority: Colors.greenAccent
-  // ),
-  // AppMessage(
-  //     sender: medium,
-  //     time: '9:05 AM',
-  //     text: 'Stories for Sahil Chaudhari : How I got an engineering internships in...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-  //     subject: 'Simple SQFlite databases examples in flutter',
-  //     isStarred: false,
-  //     unread: true,
-  //     priority: Colors.limeAccent
-  // ),
-  // AppMessage(
-  //     sender: amazon,
-  //     time: 'Dec 11',
-  //     text: 'Amazon Orders|1 of 5 items order has been dispatched...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-  //     subject: 'Your Amazon.in order #205-304458 of 1 item has been dispatched',
-  //     isStarred: false,
-  //     unread: true,
-  //     priority: Colors.lightBlueAccent
-  // ),
-  // AppMessage(
-  //     sender: leetcode,
-  //     time: 'Dec 11',
-  //     text: 'Hello!🎉 Congratulations to our 1st leetcodes Pick winner...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-  //     subject: 'Leetcode Weekly Digest',
-  //     isStarred: false,
-  //     unread: true,
-  //     priority: Colors.lightBlueAccent
-  // ),
-  // AppMessage(
-  //     sender: digitalocean,
-  //     time: 'Dec 10',
-  //     text: 'Get your Dev Badge at Hacktoberfest ,just by login into the Dev Website...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ',
-  //     subject: 'Dev Badge @Hacktoberfest',
-  //     isStarred: false,
-  //     unread: true,
-  //     priority: Colors.lime
-  // ),
-  // AppMessage(
-  //     sender: digitalocean1,
-  //     time: 'Dec 10',
-  //     text: 'Get your Dev Badge at Hacktoberfest ,just by login into the Dev Website...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ',
-  //     subject: 'Dev Badge @Hacktoberfest',
-  //     isStarred: false,
-  //     unread: true,
-  //     priority: Colors.lime
-  // ),
-  // AppMessage(
-  //     sender: digitalocean2,
-  //     time: 'Dec 10',
-  //     text: 'Get your Dev Badge at Hacktoberfest ,just by login into the Dev Website...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ',
-  //     subject: 'Dev Badge @Hacktoberfest',
-  //     isStarred: false,
-  //     unread: true,
-  //     priority: Colors.white
-  // ),
-  // AppMessage(
-  //     sender: digitalocean3,
-  //     time: 'Dec 10',
-  //     text: 'Get your Dev Badge at Hacktoberfest ,just by login into the Dev Website...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ',
-  //     subject: 'Dev Badge @Hacktoberfest',
-  //     isStarred: false,
-  //     unread: true,
-  //     priority: Colors.lime
-  // ),
-  // AppMessage(
-  //     sender: digitalocean4,
-  //     time: 'Dec 10',
-  //     text: 'Get your Dev Badge at Hacktoberfest ,just by login into the Dev Website...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ',
-  //     subject: 'Dev Badge @Hacktoberfest',
-  //     isStarred: false,
-  //     unread: true,
-  //     priority: Colors.white
-  // ),
-// ];
 

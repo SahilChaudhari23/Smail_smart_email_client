@@ -55,12 +55,6 @@ class _GmailState extends State<Gmail> {
 
   @override
   Widget build(BuildContext context) {
-    final firstString =
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Aliquam faucibus purus in massa. Enim lobortis scelerisque fermentum dui. Egestas quis ipsum suspendisse ultrices gravida dictum. Porttitor lacus luctus accumsan tortor. Rhoncus est pellentesque elit ullamcorper dignissim cras. Duis tristique sollicitudin nibh sit amet. Diam donec adipiscing tristique risus nec feugiat in. Ornare arcu dui vivamus arcu. Sagittis vitae et leo duis ut diam quam nulla porttitor. Faucibus pulvinar elementum integer enim neque volutpat ac. Sapien et ligula ullamcorper malesuada.';
-    //final secondString =
-    //'Enim sed faucibus turpis in eu mi. Cras adipiscing enim eu turpis egestas pretium aenean pharetra magna. Mattis nunc sed blandit libero volutpat sed cras ornare arcu. Mauris pellentesque pulvinar pellentesque habitant morbi tristique. Scelerisque in dictum non consectetur a erat. ';
-    //final longString = firstString + "\n\n\n" + secondString;
-    //Color x = Colors.black;
     return Scaffold(
       //key: _key2,
       appBar: AppBar(
@@ -375,18 +369,7 @@ class _GmailState extends State<Gmail> {
                   //   ),
                   // ),
                   //SizedBox(height: 10),
-                  Container(
-                    padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
-                    // height: 1000,
-                    color: Colors.pink[50],
-                    child: Text(
-                      firstString,
-                      style: TextStyle(
-                        fontSize: 15.0,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                  ),
+
                 ],
               )
             ], //children

@@ -6,6 +6,9 @@ import 'package:googleapis/gmail/v1.dart';
 import 'package:googleapis/admin/directory_v1.dart';
 import 'package:testing/models/message_model.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import 'package:device_apps/device_apps.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:android_intent/android_intent.dart';
 
 GmailMessage gmailMessage = GmailMessage();
 GoogleSignInAccount? currentUser;

@@ -162,7 +162,7 @@ class _MailsState extends State<Mails> {
                             Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.all(Radius.circular(20)),
-                                color: gmailMessage.messages[index - 1].priority,
+                                color: gmailMessage.priorityHandler.pNumMap[gmailMessage.priorityHandler.emailMap[gmailMessage.messages[index-1].id]],
                               ),
                               margin: EdgeInsets.only(
                                   top: 3.0, bottom: 3.0, right: 0.0, left: 5.0),
@@ -248,14 +248,14 @@ class _MailsState extends State<Mails> {
                                           width: MediaQuery.of(context).size.width * 0.6,
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.start,
-                                            children: List.generate(2, (i) {
+                                            children: List.generate(gmailMessage.priorityHandler.emailTag[gmailMessage.messages[index-1].id].length, (i) {
                                               return Container(
                                                 decoration: BoxDecoration(
                                                   borderRadius: BorderRadius.all(Radius.circular(20)),
-                                                  color: Colors.amber[600],
+                                                  color: (gmailMessage.priorityHandler.emailTag[gmailMessage.messages[index-1].id][i] == "Have Date") || (gmailMessage.priorityHandler.emailTag[gmailMessage.messages[index-1].id][i] == "Deadline") ? Colors.deepOrange : Colors.amber[600],
                                                 ),
                                                 alignment: Alignment.center,
-                                                child: Text('Label',
+                                                child: Text(gmailMessage.priorityHandler.emailTag[gmailMessage.messages[index-1].id][i],
                                                   style: TextStyle(fontSize: 12.0),),
                                                 margin: const EdgeInsets.all(5.0),
                                                 width: MediaQuery.of(context).size.width * 0.2,
