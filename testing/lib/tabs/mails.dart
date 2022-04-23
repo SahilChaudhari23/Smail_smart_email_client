@@ -5,7 +5,6 @@ import 'package:testing/tabs/compose.dart';
 import 'package:testing/tabs/frontpage.dart';
 import 'dart:math';
 import 'package:flutter/rendering.dart';
-
 import 'drawer.dart';
 
 shortUsername(username) {

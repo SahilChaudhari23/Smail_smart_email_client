@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:testing/tabs/mails.dart';
 import 'dart:async';
+import 'package:testing/tabs/config.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/gmail/v1.dart';
 import 'package:googleapis/admin/directory_v1.dart';
 import 'package:testing/models/message_model.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
-import 'package:device_apps/device_apps.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:android_intent/android_intent.dart';
+
 
 GmailMessage gmailMessage = GmailMessage();
 GoogleSignInAccount? currentUser;
@@ -21,6 +20,7 @@ final GoogleSignIn _googleSignIn = GoogleSignIn.standard(
     GmailApi.gmailReadonlyScope,
   ],
 );
+
 
 class FrontPage extends StatefulWidget {
   @override
@@ -80,7 +80,7 @@ class FrontPageState extends State<FrontPage> {
             _state = 'loaded';
             _msg = msg;
             _children.add(Mails());
-            _children.add(Mails());
+            _children.add(Config());
             _children.add(_signOut());
             return;
           });

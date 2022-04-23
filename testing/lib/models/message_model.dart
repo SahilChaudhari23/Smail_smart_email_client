@@ -1,10 +1,7 @@
 import 'package:testing/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/admin/directory_v1.dart';
-import 'package:testing/models/user_model.dart';
-import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart';
-import 'package:googleapis/admin/directory_v1.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'package:testing/models/priority_handler.dart';

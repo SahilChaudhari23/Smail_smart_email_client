@@ -4,6 +4,8 @@ import 'package:testing/tabs/mails.dart';
 import 'package:testing/tabs/frontpage.dart';
 import 'package:flutter/material.dart';
 import 'package:testing/tabs/reply.dart';
+import 'package:testing/tabs/tts.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
 
 shortUsername(username) {
   String uname = username.toString();
@@ -13,6 +15,7 @@ shortUsername(username) {
     return uname;
   }
 }
+
 // ignore: must_be_immutable
 class Gmail extends StatefulWidget {
   final int index;
@@ -40,6 +43,26 @@ class Gmail extends StatefulWidget {
 
 class _GmailState extends State<Gmail> {
   bool _hasBeenPressed = false;
+
+  _openCalendar () async {
+    await LaunchApp.openApp(
+      androidPackageName: 'com.google.android.calendar',
+      iosUrlScheme: 'googlecalendar://',
+      appStoreLink:
+      'https://play.google.com/store/apps/details?id=com.google.android.calendar',
+      // openStore: false
+    );
+  }
+
+  _openClock () async {
+    await LaunchApp.openApp(
+      androidPackageName: 'com.google.android.deskclock&hl=en_IN&gl=US',
+      iosUrlScheme: 'googleclock://',
+      appStoreLink:
+      'https://play.google.com/store/apps/details?id=com.google.android.deskclock&hl=en_IN&gl=US',
+      // openStore: false
+    );
+  }
   
    GlobalKey _key2 = GlobalKey();
   @override
@@ -52,7 +75,6 @@ class _GmailState extends State<Gmail> {
     _getSizes();
     //_getPositions();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,32 +84,7 @@ class _GmailState extends State<Gmail> {
         actions: [
           IconButton(
               icon: Icon(Icons.archive),
-              onPressed: () {
-              //   Message deletedItem = mails.removeAt(widget.index - 1);
-              //   print(deletedItem);
-              //  // _key2.currentState
-              //     Scaffold.of(context).showSnackBar(
-              //       SnackBar(
-              //         content: Text(
-              //           "1 Archieved",
-              //           style: TextStyle(color: Colors.white),
-              //         ),
-              //         action: SnackBarAction(
-              //             label: "UNDO",
-              //             //onPressed: () {},
-              //             onPressed: () {
-              //               setState(
-              //                 () => mails.insert(widget.index - 1, deletedItem),
-              //               );
-              //               Navigator.push(
-              //                   context,
-              //                   MaterialPageRoute(
-              //                       builder: (builder) => Mails()));
-              //             } // this is what you needed
-              //             ),
-              //       ),
-              //     );
-              }),
+              onPressed: () {}),
           IconButton(icon: Icon(Icons.delete), onPressed: () {
             gmailMessage.messages.removeAt(widget.index - 1);
             Navigator.push(
@@ -382,11 +379,11 @@ class _GmailState extends State<Gmail> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              button(Icons.reply, "Reply", 1, widget.user.name, widget.subject,
+              button(Icons.access_alarm_outlined, "Alarm", 1, widget.user.name, widget.subject,
                   widget.text, widget.time),
-              button(Icons.reply_all, "Reply All", 2, widget.user.name,
+              button(Icons.calendar_today_rounded, "Event", 2, widget.user.name,
                   widget.subject, widget.text, widget.time),
-              button(Icons.arrow_forward, "Forward", 3, widget.user.name,
+              button(Icons.speaker_phone, "Text to Speech", 3, widget.user.name,
                   widget.subject, widget.text, widget.time),
             ],
           ),
@@ -403,27 +400,56 @@ class _GmailState extends State<Gmail> {
 
   Widget button(IconData icon, String text, int index, String name,
       String subject, String msg, String time) {
-    return SizedBox(
-      height: 46,
-      child: OutlineButton.icon(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (builder) => Reply(
-                      index: index,
-                      title: text,
-                      user: name,
-                      subject: subject,
-                      msg: msg,
-                      time: time)));
-        },
-        icon: Icon(icon),
-        label: Text((text), style: TextStyle(color: Colors.grey[800])),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-            side: BorderSide(color: Colors.grey.shade400)),
-      ),
-    );
+    if(text == "Text to Speech"){
+      return SizedBox(
+        height: 46,
+        child: OutlineButton.icon(
+          color: Colors.deepOrangeAccent,
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (builder) => TTS(widget.text)));
+          },
+          icon: Icon(icon),
+          label: Text((text), style: TextStyle(color: Colors.grey[800])),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+              side: BorderSide(color: Colors.grey.shade400)),
+        ),
+      );
+    }else{
+      if(text == "Alarm"){
+        return SizedBox(
+          height: 46,
+          child: OutlineButton.icon(
+            color: Colors.amber,
+            onPressed: () {
+              _openClock();
+            },
+            icon: Icon(icon),
+            label: Text((text), style: TextStyle(color: Colors.grey[800])),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+                side: BorderSide(color: Colors.grey.shade400)),
+          ),
+        );
+      }else{
+        return SizedBox(
+          height: 46,
+          child: OutlineButton.icon(
+            color: Colors.lightBlueAccent,
+            onPressed: () {
+              _openCalendar();
+            },
+            icon: Icon(icon),
+            label: Text((text), style: TextStyle(color: Colors.grey[800])),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+                side: BorderSide(color: Colors.grey.shade400)),
+          ),
+        );
+      }
+    }
   }
 }
