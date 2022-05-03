@@ -1,8 +1,8 @@
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
+import 'package:highlight_text/highlight_text.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:file_picker/file_picker.dart';
-import 'package:testing/tabs/frontpage.dart';
-import 'package:testing/models/message_model.dart';
-// import 'dart:io';
 
 class Compose extends StatefulWidget {
 
@@ -13,8 +13,22 @@ class Compose extends StatefulWidget {
 class _ComposeState extends State<Compose> {
   late PlatformFile file;
   bool entered = false;
-  final _mails = gmailMessage.emailIds;
+  final _mails = ["111801054@smail.iitpkd.ac.in"];
   bool isClicked = false;
+
+  final Map<String, HighlightedWord> _highlights = {};
+
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _text = '';
+  double _confidence = 1.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,6 +112,19 @@ class _ComposeState extends State<Compose> {
               onSelected: (value) {}),
         ],
         elevation: 0,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: AvatarGlow(
+        animate: _isListening,
+        glowColor: Theme.of(context).primaryColor,
+        endRadius: 75.0,
+        duration: const Duration(milliseconds: 2000),
+        repeatPauseDuration: const Duration(milliseconds: 100),
+        repeat: true,
+        child: FloatingActionButton(
+          onPressed: _listen,
+          child: Icon(_isListening ? Icons.mic : Icons.mic_none),
+        ),
       ),
       body: Column(
         children: [
@@ -257,6 +284,7 @@ class _ComposeState extends State<Compose> {
             children: [
               Expanded(
                 child: TextField(
+                  controller: TextEditingController(text: _text),
                   cursorHeight: 24,
                   style: TextStyle(fontSize: 18),
                   decoration: InputDecoration(
@@ -266,12 +294,37 @@ class _ComposeState extends State<Compose> {
                       contentPadding: EdgeInsets.fromLTRB(20, 20, 20, 20)),
                   keyboardType: TextInputType.text,
                 ),
-              )
+              ),
             ],
           ),
         ],
       ),
     );
+  }
+
+
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => debugPrint('onStatus: $val'),
+        onError: (val) => debugPrint('onError: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) => setState(() {
+            _text = val.recognizedWords;
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              _confidence = val.confidence;
+            }
+          }),
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
   }
 
   String value = "111801054@smail.iitpkd.ac.in";

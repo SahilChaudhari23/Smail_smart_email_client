@@ -37,7 +37,7 @@ class PriorityHandler {
     pNumMap[11.0] = Colors.deepOrangeAccent;
   }
 
-  void setTag(String tName, List<String> keywords, double pNum, Color pColor, {double threshold = 0.8}){
+  void setTag(String tName, List<String> keywords, double pNum, Color pColor, {double threshold = 0.2}){
     if(! tagMap.containsKey(tName)){
       Tag t = Tag(tName);
       t.keywords.addAll(keywords);
