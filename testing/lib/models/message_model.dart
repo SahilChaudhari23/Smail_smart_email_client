@@ -14,6 +14,8 @@ class GmailMessage{
   var emailIds = <String>[];
   var userList = <UserData>[];
   var messages = <AppMessage>[];
+  var sortMessageList = <AppMessage>[];
+  late Map mailMap = {};
   var priorityHandler = PriorityHandler();
   List<String> headers = ["Subject","Delivered-To","Received","From","Date","To"];
   Codec<String, String> stringToBase64Url = utf8.fuse(base64Url);
@@ -186,7 +188,7 @@ class GmailMessage{
         }
       }
     }
-    String date = day+' '+newMonth+' '+year;
+    String date = day+'-'+newMonth;
     String newH = hh.toString();
     String newM = mm.toString();
     if(hh <= 9){
@@ -197,7 +199,7 @@ class GmailMessage{
     }
     String newTime = newH+':'+newM;
     String dateTime = year+enumMonth(newMonth)+day+newH+newM;
-    return date+'/'+newTime+'/'+dateTime;
+    return date+'/'+newTime+'/'+dateTime+'/'+year+'-'+day+'-'+enumMonth(newMonth);
   }
 
   Future<void> buildAppMessage(String emailId,Message messageData, DirectoryApi directoryApi) async {
@@ -216,6 +218,10 @@ class GmailMessage{
         if(element.name == "Received"){
           time = element.value ?? "" ;
           if(time != ""){
+            DateTime now = new DateTime.now();
+            DateTime dates = new DateTime(now.year, now.day, now.month);
+            var d = dates.toString().replaceAll("00:00:00.000", "");
+            d = d.replaceAll(" ", "");
             final temp = time.split(';')[1].split(',')[1].split(' ');
             String dateTimeData = dateTimeConverter(temp[1], temp[2], temp[3], temp[4]);
             debugPrint(dateTimeData);
@@ -223,6 +229,12 @@ class GmailMessage{
             date = tempDateTime[0];
             time = tempDateTime[1];
             dateTime = tempDateTime[2];
+            String intDate = tempDateTime[3];
+            debugPrint(intDate);
+            debugPrint(d);
+            if(intDate != d){
+              time = date;
+            }
           }
           debugPrint(time);
           flag = false;
@@ -253,11 +265,15 @@ class GmailMessage{
     final appMessageData = AppMessage(id:emailId,sender: senderData, time: time, datetime: dateTime, date: date, text: text, subject: subject, isStarred: false, unread: false, priority: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(0.5));
     debugPrint(senderData.name);
     messages.add(appMessageData);
+    mailMap[emailId] = appMessageData;
   }
 
   Future<String> fetchMessages(GmailApi gmailApi, Message message, DirectoryApi directoryApi) async{
     String msg = "";
     String id = message.id ?? "";
+    if(mailMap.containsKey(id)){
+      return "key exist";
+    }
     // debugPrint(id);
     Message messageData = await gmailApi.users.messages.get("me",id);
     messagesList.add(messageData);
@@ -284,12 +300,22 @@ class GmailMessage{
     messages.sort((a,b) => b.datetime.compareTo(a.datetime));
     debugPrint("count : : "+messagesList.length.toString());
     priorityHandler.getPriority(messages);
+    priorityHandler.sortPriority(mailMap);
+    priorityHandler.mailList.forEach((element) {
+      sortMessageList.add(mailMap[element]);
+    });
     // for (var element in messages) {
     //   debugPrint("sorting");
     //   debugPrint(element.date);
     //   debugPrint(element.time);
     //   debugPrint(element.subject);
     // }
+  }
+
+  void clearMsg(){
+    messages.clear();
+    sortMessageList.clear();
+    messagesList.clear();
   }
 }
 
