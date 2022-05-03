@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:testing/models/tag_model.dart';
 import 'package:testing/models/message_model.dart';
 import 'package:retrieval/trie.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Pair{
   final double pNum;
@@ -22,6 +24,7 @@ class PriorityHandler {
   // pNum : color
   late Map pNumMap;
   late List<Tag> tagList;
+  late List<String> mailList;
   int topK = 60;
   int maxTags = 2;
   final dateDetector = RegExp(r'([0-2][0-9])\s*(st|nd|rd|th)?\s*(\.|\,|\\|\s)\s*(([0][1-9])|[1][0-2]|[1-9]|(Jan|jan|Feb|feb|Mar|mar|Apr|apr|May|may|Jun|jun|Jul|jul|Aug|aug|Sep|sep|Oct|oct|Nov|nov|Dec|dec)[a-z]*)\s*((\.|\,|\\|\s)\s*(([0-9][0-9][0-9][0-9])|([0-9][0-9])))');
@@ -33,6 +36,7 @@ class PriorityHandler {
     emailTag = {};
     pNumMap = {};
     tagList = [];
+    mailList = [];
     pNumMap[0.0] = Colors.lightGreenAccent;
     pNumMap[11.0] = Colors.deepOrangeAccent;
   }
@@ -52,7 +56,7 @@ class PriorityHandler {
     }
   }
   
-  void init(){
+  void init() async{
     setTag("Academics",["academics", "endsem", "exam", "result", "fee", "scholarships"],10,Colors.red,threshold: 0.1);
     setTag("Job/CDC",["cdc","job","internship","published","profile"],9,Colors.yellow,threshold: 0.1);
     setTag("Deadline",["deadline","due"],7,Colors.blue,threshold: 0.1);
@@ -154,5 +158,17 @@ class PriorityHandler {
         emailMap[mail.id] = bodyTag[0].pNum;
       }
     }
+  }
+
+  void sortPriority(Map mailMap){
+    var sortMapByValue = Map.fromEntries(
+        emailMap.entries.toList()
+          ..sort((e2, e1) => mailMap[e1.key].datetime.compareTo(mailMap[e2.key].datetime)));
+    var sortMapByValue1 = Map.fromEntries(
+        sortMapByValue.entries.toList()
+          ..sort((e2, e1) => e1.value.compareTo(e2.value)));
+    var tempList = sortMapByValue1.keys.toList();
+    mailList = tempList.map((e) => e.toString()).toList();
+    debugPrint(mailList.toString());
   }
 }
