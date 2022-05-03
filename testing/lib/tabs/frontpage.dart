@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:testing/tabs/mails.dart';
+import 'package:testing/tabs/sortMails.dart';
 import 'dart:async';
 import 'package:testing/tabs/config.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -7,6 +8,7 @@ import 'package:googleapis/gmail/v1.dart';
 import 'package:googleapis/admin/directory_v1.dart';
 import 'package:testing/models/message_model.dart';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import 'package:flutter/services.dart';
 
 
 GmailMessage gmailMessage = GmailMessage();
@@ -80,6 +82,7 @@ class FrontPageState extends State<FrontPage> {
             _state = 'loaded';
             _msg = msg;
             _children.add(Mails());
+            _children.add(SortMails());
             _children.add(Config());
             _children.add(_signOut());
             return;
@@ -94,7 +97,11 @@ class FrontPageState extends State<FrontPage> {
   }
 
 
-  Future<void> _handleSignOut() => _googleSignIn.disconnect();
+  Future<void> _handleSignOut() async{
+    gmailMessage.clearMsg();
+    _googleSignIn.disconnect();
+    SystemNavigator.pop();
+  }
 
   Future<void> _handleSignIn() async {
     try {
@@ -105,8 +112,53 @@ class FrontPageState extends State<FrontPage> {
   }
 
   Widget _signOut() {
-    _handleSignOut();
-    return _signIn();
+    _currentIndex = 0;
+    return Scaffold(
+      // backgroundColor: Colors.deepOrange[300],
+      appBar: AppBar(title: Text('Log-Out Page'),
+        backgroundColor: Colors.amber.shade300,
+      ),
+      body: Center(
+        child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              image: DecorationImage(
+                image: AssetImage("assets/images/bg1.jpg"),
+                fit: BoxFit.cover,
+                opacity: 0.4,
+              ),
+            ),
+            child: Column(
+              // crossAxisAlignment: CrossAxisAlignment.center,
+              // mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 40.0),
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage('assets/images/logo.png'),
+                    radius: 150.0,
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.only(bottom: 30.0),
+                  child: Text('Are you sure to Disconnect and Exit',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                FloatingActionButton.extended(
+                  onPressed: (){ _handleSignOut();},
+                  label: Text('Disconnect'),
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                ),
+              ],
+            )
+        ),
+      ),
+    );
   }
 
   Widget _signIn() {
@@ -185,11 +237,11 @@ class FrontPageState extends State<FrontPage> {
       );
     }
     if(_msg != ''){
-      debugPrint(gmailMessage.messages.first.subject);
       return Scaffold(
         body: _children[_currentIndex],
         // backgroundColor: Colors.transparent,
         bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.lightBlue.shade100,
           fixedColor: Colors.blue,
           onTap: onTabTapped,
@@ -230,7 +282,11 @@ class FrontPageState extends State<FrontPage> {
                   ],
                 ),
               ),
-              label: 'Mail',
+              label: 'Sort',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.sort,size: 35),
+              label: 'Sort',
             ),
             const BottomNavigationBarItem(
               icon: Icon(Icons.settings, size: 35.0),
